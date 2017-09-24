@@ -1,4 +1,4 @@
-A DLL written to DFS search for a route
+The dll was written in C++ to provide a quick solution to this question.
 
 The python part:
 # Randomly fills a grid of size 10 x 10 with digits between 0
@@ -11,4 +11,3 @@ The python part:
 # always trying to keep the current direction,
 # and if that does not work turning in a clockwise manner.
 
-The dll was written in C++ to provide a quick solution to this question.

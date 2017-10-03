@@ -3,16 +3,16 @@
 
 #include "stdafx.h"
 
-#include <thread>
-#include <unordered_set>
 #include <vector>
+#include <unordered_set>
 using namespace std;
 
 template<>
-struct hash<pair<int, int>> {
-	size_t operator()(const pair<int, int>& pt) const
+struct hash<pair<int, int>>
+{
+	size_t operator()(const pair<int, int>& pt)	 const
 	{
-		return (pt.first << 16) + pt.second;
+		return pt.first << 16 + pt.second;
 	}
 };
 
@@ -46,101 +46,28 @@ int sumGrid(const int grid[10][10])
 	return sum;
 }
 
-vector<pair<int, int>> vec[4][4];
-int found[4] = { 0,0,0,0 };
-
-void seek(const pair<int, int>& root, const int grid[10][10], const int& initialDirection, const int& nextDirection, const int& target)
+vector<pair<int, int>> seek(const pair<int, int>& root, const int grid[10][10], const int& target)
 {
-	if (abs(initialDirection - nextDirection) == 2)
-		return;
 	int sum = grid[root.first][root.second];
+	vector<pair<int, int>> stack;
+	if (sum == target)
+	{
+		stack.push_back(root);
+		return stack;
+	}
 	char directions[10][10][5];
 	memset(directions, 0, 500);
-	vector<pair<int, int>> stack;
+	
 	unordered_set<pair<int, int>> stack_set;
 	stack_set.insert(root);
 	stack.push_back(root);
-
-	pair<int, int> nxt = make_pair(-1, -1);
-
-	if (initialDirection == 3 && root.second != 0)
+	int direction = 0;
+	pair<int, int>* recurPoint = NULL;
+	while (stack.size())
 	{
-		nxt.first = root.first;
-		nxt.second = root.second - 1;
-	}
-	else if (initialDirection == 2 && root.first != 9)
-	{
-		nxt.first = root.first + 1;
-		nxt.second = root.second;
-	}
-	else if (initialDirection == 1 && root.second != 9)
-	{
-		nxt.first = root.first;
-		nxt.second = root.second + 1;
-	}
-	else if (initialDirection == 0 && root.first != 0)
-	{
-		nxt.first = root.first - 1;
-		nxt.second = root.second;
-	}
-	if (nxt.first == -1)
-		return;
-	sum += grid[nxt.first][nxt.second];
-	stack.push_back(nxt);
-	stack_set.insert(nxt);
-
-	pair<int, int> nxt2 = make_pair(-1, -1);
-	pair<int, int> *pt = &stack[stack.size() - 1];
-
-	int direction = nextDirection;
-	if (direction == 3 && pt->second != 0)
-	{
-		nxt2.first = pt->first;
-		nxt2.second = pt->second - 1;
-	}
-	else if (direction == 2 && pt->first != 9)
-	{
-		nxt2.first = pt->first + 1;
-		nxt2.second = pt->second;
-	}
-	else if (direction == 1 && pt->second != 9)
-	{
-		nxt2.first = pt->first;
-		nxt2.second = pt->second + 1;
-	}
-	else if (direction == 0 && pt->first != 0)
-	{
-		nxt2.first = pt->first - 1;
-		nxt2.second = pt->second;
-	}
-	if (nxt2.first == -1)
-		return;
-	int backDirection = direction + 2;
-	if (backDirection > 3)
-		backDirection -= 4;
-	directions[nxt2.first][nxt2.second][backDirection] = 1;
-	sum += grid[nxt2.first][nxt2.second];
-	stack.push_back(nxt2);
-	stack_set.insert(nxt2);
-
-	do
-	{
-		for (int i = 0; i < initialDirection; i++)
-			if (found[i])
-				return;
-		for (int j = 0; j < 4; j++)
-		{
-			int d = initialDirection + j;
-			if (d > 3)
-				d -= 4;
-			if (d == nextDirection)
-				break;
-			if (vec[initialDirection][d].size())
-				return;
-		}
-
 		pair<int, int> nxt = make_pair(-1, -1);
 		pair<int, int> *pt = &stack[stack.size() - 1];
+		bool isRecur = 0;
 		if (sum < target)
 		{
 			for (int i = 0; i < 4; i++)
@@ -152,7 +79,10 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 					if (stack_set.find(nxt) == stack_set.end())
 						break;
 					else
+					{
 						nxt.first = -1;
+						isRecur = 1;
+					}
 				}
 				else if (direction == 2 && pt->first != 9 && directions[pt->first][pt->second][direction] == 0)
 				{
@@ -161,7 +91,10 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 					if (stack_set.find(nxt) == stack_set.end())
 						break;
 					else
+					{
 						nxt.first = -1;
+						isRecur = 1;
+					}
 				}
 				else if (direction == 1 && pt->second != 9 && directions[pt->first][pt->second][direction] == 0)
 				{
@@ -170,7 +103,10 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 					if (stack_set.find(nxt) == stack_set.end())
 						break;
 					else
+					{
 						nxt.first = -1;
+						isRecur = 1;
+					}
 				}
 				else if (direction == 0 && pt->first != 0 && directions[pt->first][pt->second][direction] == 0)
 				{
@@ -179,7 +115,10 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 					if (stack_set.find(nxt) == stack_set.end())
 						break;
 					else
+					{
 						nxt.first = -1;
+						isRecur = 1;
+					}
 				}
 				direction++;
 				if (direction == 4)
@@ -188,6 +127,8 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 		}
 		if (nxt.first != -1)
 		{
+			if (!recurPoint && isRecur && pt->first != 0 && pt->second != 0 && pt->first != 9 && pt->second != 9)
+				recurPoint = pt;
 			int backDirection = direction + 2;
 			if (backDirection > 3)
 				backDirection -= 4;
@@ -198,22 +139,32 @@ void seek(const pair<int, int>& root, const int grid[10][10], const int& initial
 			stack_set.insert(nxt);
 			sum += grid[nxt.first][nxt.second];
 			if (sum == target)
-			{
-				vec[initialDirection][nextDirection] = vector<pair<int, int>>(stack);
-				found[initialDirection] = 1;
-				return;
-			}
+				return stack;
 		}
 		else
 		{
-			sum -= grid[pt->first][pt->second];
-			memset(&directions[pt->first][pt->second][0], 0, 5);
-			stack_set.erase(*pt);
-			stack.pop_back();
+			if (recurPoint)
+			{
+				while (*pt != *recurPoint)
+				{
+					sum -= grid[pt->first][pt->second];
+					memset(&directions[pt->first][pt->second][0], 0, 5);
+					stack_set.erase(*pt);
+					stack.pop_back();
+					pt = &stack[stack.size() - 1];
+				}
+			}
+			else
+			{
+				sum -= grid[pt->first][pt->second];
+				memset(&directions[pt->first][pt->second][0], 0, 5);
+				stack_set.erase(*pt);
+				stack.pop_back();
+			}
 			if (stack.size())
 				direction = directions[stack[stack.size() - 1].first][stack[stack.size() - 1].second][4];
 		}
-	} while (stack.size() > 2);
+	}
 }
 
 
@@ -223,33 +174,10 @@ extern "C" _declspec(dllexport) void DFS(char* out, const int grid[10][10], cons
 		return;
 	int sum = grid[x][y];
 	pair<int, int> root = make_pair(x, y);
-	if (sum < target)
+	if (sum <= target)
 	{
-		thread th[16];
-		for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-			{
-				int nextdirection = i + j;
-				if (nextdirection > 3)
-					nextdirection -= 4;
-				th[i * 4 + j] = thread(seek, root, grid, i, nextdirection, target);
-			}
-		for (int i = 0; i < 16; i++)
-			th[i].join();
-		for (int i = 0; i < 4; i++)
-		{
-			if (found[i])
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					if (vec[i][j].size())
-					{
-						vector_str(vec[i][j], out);
-						return;
-					}
-				}
-			}
-		}
+		vector<pair<int, int>> vec = seek(root, grid, target);
+		vector_str(vec, out);
 	}
 }
 
